@@ -7,17 +7,19 @@ import TechDistribution from "@/components/TechDistribution";
 export default function Home() {
   return (
     <div>
-      <Header/>
-      <body>
-        <div id="body" className="flex">
-          <Sidebar/>
-          <main>
-            <ExportViewControls/>
-            <ResultsTable/>
-            <TechDistribution/>
+      <Header />
+        <div id="body" className="grid grid-cols-10">
+          <div className="col-span-2 flex">
+            <Sidebar />
+          </div>
+          <main className="col-span-8 mr-6">
+            
+              <ExportViewControls />
+              <ResultsTable />
+              <TechDistribution />
+            
           </main>
         </div>
-      </body>
     </div>
   );
 }
