@@ -1,103 +1,202 @@
-import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div>
+      <header>
+        <div className="flex justify-between p-3 border-b-1">
+          <div className="text-[20px] font-bold font-sans text-xl underline italic">
+            Built-With
+          </div>
+          <div className="">
+            <Input
+              placeholder="Search companies, domains or technologies"
+              className="w-xl"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          <div className="mr-10 font-sans">No Dataset Loaded</div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </header>
+      <body>
+        <div id="body" className="flex">
+          <div id="sidebar" className="m-6">
+            <div className="p-5 border-2 rounded-2xl">
+              <p className="text-xl font-bold mb-4 font-sans">Dataset Upload</p>
+              <div className="flex ">
+                <Input type="file" />
+                <Button variant="outline" className="px-2 font-semibold ml-2">
+                  Reset
+                </Button>
+              </div>
+              <p className="font-sans text-[15px] mt-4 opacity-60">
+                Failed to parse JSON. Ensure it is an array of objects
+              </p>
+            </div>
+
+            <ScrollArea
+              id="search-builder"
+              className="p-5 border-2 mt-4 rounded-2xl"
+            >
+              <p className="text-xl font-sans font-bold mb-2">Search Builder</p>
+              <div className="flex justify-around font-sans mt-4 mb-3">
+                <div>
+                  <div className="font-semibold mb-1">Country</div>
+                  <div>
+                    <Select>
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                        <SelectItem value="system">System</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div>
+                  <div className="font-semibold mb-1">Company Category</div>
+                  <div>
+                    <Select>
+                      <SelectTrigger className="w-[100px]">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                        <SelectItem value="system">System</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              <Separator />
+              <div className="my-4">
+                <div className="font-semibold mb-1 font-sans">
+                  Technology Filters
+                </div>
+                <div>
+                  <Input
+                    className="border-2"
+                    placeholder="Type to search technologies..."
+                  />
+                </div>
+                <div className="mt-5 flex justify-around font-sans font-semibold">
+                  <div>AND</div>
+                  <div>OR</div>
+                  <div>NOT</div>
+                </div>
+              </div>
+              <Separator />
+              <div className="my-4">
+                <div className="flex justify-around font-sans mt-4 mb-3">
+                  <div>
+                    <div className="font-semibold mb-1">Total Technologies</div>
+                    <div>
+                      <Select>
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue placeholder="Any" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Light</SelectItem>
+                          <SelectItem value="dark">Dark</SelectItem>
+                          <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-semibold mb-1">
+                      Technologies per <br />
+                      Category
+                    </div>
+                    <div>
+                      <Select>
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue placeholder="Any" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Light</SelectItem>
+                          <SelectItem value="dark">Dark</SelectItem>
+                          <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="flex my-4 justify-around">
+                  <Button className="font-sans font-semibold">
+                    Run Search
+                  </Button>
+                  <Button variant="outline">Reset Filters</Button>
+                </div>
+              </div>
+            </ScrollArea>
+          </div>
+          <main>
+            <div className="flex justify-between p-5 mt-6 mb-4 border-2 rounded-2xl font-sans">
+              <div>
+                <Select>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Export" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Export in JSON</SelectItem>
+                    <SelectItem value="dark">Export in CSV</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Select>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Export" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Export in JSON</SelectItem>
+                    <SelectItem value="dark">Export in CSV</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Select>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="View" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Table</SelectItem>
+                    <SelectItem value="dark">Grid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div id="results-table" className="p-5 border-2 rounded-2xl">
+              <div className="font-sans font-semibold">Search Results</div>
+              <div></div>
+              <div></div>
+            </div>
+            <div id="tech-ditribution" className="p-5 border-2 rounded-2xl my-4">
+              <div className="font-semibold font-sans">Tech distribution</div>
+              <div>Graph</div>
+              <div>
+                <p className="opacity-60 font-sans">No data to display. Upload a dataset and run a search</p>
+              </div>
+            </div>
+          </main>
+        </div>
+      </body>
     </div>
   );
 }
