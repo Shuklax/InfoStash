@@ -5,7 +5,7 @@ export default function Header() {
     <header>
       <div className="flex justify-between items-center p-3 border">
         <div className="text-[20px] font-bold font-sans text-xl underline italic">
-          Built-With
+          InfoStash
         </div>
         <div className="flex justify-center w-96">
           <Input
