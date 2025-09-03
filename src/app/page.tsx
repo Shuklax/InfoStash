@@ -8,11 +8,11 @@ export default function Home() {
   return (
     <div>
       <Header />
-        <div id="body" className="grid grid-cols-10">
-          <div className="col-span-2 flex">
+        <div id="body" className="grid grid-cols-12">
+          <div className="col-span-3 flex">
             <Sidebar />
           </div>
-          <main className="col-span-8 mr-6">
+          <main className="col-span-9 mr-6">
             
               <ExportViewControls />
               <ResultsTable />
