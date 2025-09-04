@@ -1,5 +1,6 @@
 "use client";
 
+import classNames from "classnames";
 import { useEffect, useState } from "react";
 import { ComboboxInput } from "./ComboboxInput";
 import { Checkbox } from "../ui/checkbox";
@@ -178,7 +179,12 @@ export function CompanyCategoryFilter() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center">
+        <div
+          className={classNames(
+            "flex items-center",
+            filters.filteringType === "together" ? "disabled opacity-50" : ""
+          )}
+        >
           <Checkbox
             className="mx-2 my-3 border-2"
             checked={filters.removeDuplicates}

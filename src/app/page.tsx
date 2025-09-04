@@ -16,7 +16,7 @@ export default function Home() {
             
               <ExportViewControls />
               <ResultsTable />
-              <TechDistribution />
+              {/* <TechDistribution /> */}
             
           </main>
         </div>
