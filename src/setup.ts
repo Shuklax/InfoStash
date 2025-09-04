@@ -9,7 +9,7 @@ import { z } from "zod";
 import dayjs from "dayjs";
 import _ from "lodash";
 
-// --- Paths ---
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, "../data.db");

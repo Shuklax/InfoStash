@@ -24,6 +24,8 @@ type SearchState = {
   setCountryFilter: (filter: BaseFilter) => void;
   setCategoryFilter: (filter: BaseFilter) => void;
   setNumberFilter: (filter: Partial<NumberFilter>) => void;
+  results: Company[];
+  setResults: (rows: Company[]) => void;
   reset: () => void;
 };
 
@@ -42,6 +44,8 @@ const initialState: Omit<
   | "setCategoryFilter"
   | "setNumberFilter"
   | "reset"
+  | "results"
+  | "setResults"
 > = {
   technologyFilter: { ...initialBaseFilter },
   countryFilter: { ...initialBaseFilter },
@@ -50,6 +54,15 @@ const initialState: Omit<
     totalTechnologies: 0,
     technologiesPerCategory: 0,
   },
+};
+
+export type Company = {
+  name: string | null;
+  domain: string;
+  category: string | null;
+  country: string | null;
+  technologies: number;
+  city: string | null;
 };
 
 export const useSearchStore = create<SearchState>((set) => ({
@@ -61,5 +74,7 @@ export const useSearchStore = create<SearchState>((set) => ({
     set((state) => ({
       numberFilter: { ...state.numberFilter, ...filter },
     })),
+  results: [],
+  setResults: (rows) => set({ results: rows }),
   reset: () => set(initialState),
 }));

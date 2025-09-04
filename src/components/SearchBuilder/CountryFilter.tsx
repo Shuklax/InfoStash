@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSearchStore } from "@/store/searchStore";
+import classNames from "classnames";
 
 type FilterState = {
   and: string[];
@@ -176,7 +177,10 @@ export function CountryFilter() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex items-center">
+        <div className={classNames(
+                    "flex items-center",
+                    filters.filteringType === "together" ? "disabled opacity-50" : ""
+                  )}>
           <Checkbox
             className="mx-2 my-3 border-2"
             checked={filters.removeDuplicates}
