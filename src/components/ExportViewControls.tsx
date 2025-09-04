@@ -1,46 +1,73 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+"use client";
+
+import { useSearchStore } from "@/store/searchStore";
 import { Button } from "./ui/button";
 import { Download, FileCode } from "lucide-react";
 
 export default function ExportViewControls() {
+  const results = useSearchStore((state) => state.results);
+
+  const downloadJSON = () => {
+    const dataStr = JSON.stringify(results, null, 2);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = "exported_data.json";
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const downloadCSV = () => {
+    const replacer = (key: string, value: any) => (value === null ? "" : value);
+    const header = Object.keys(results[0] || {});
+    const csv = [
+      header.join(","),
+      ...results.map((row) =>
+        header
+          .map((fieldName) =>
+            JSON.stringify(row[fieldName as keyof typeof row], replacer)
+          )
+          .join(",")
+      ),
+    ].join("\r\n");
+    const csvData = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+    const exportFileDefaultName = "exported_data.csv";
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", csvData);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
   return (
     <div
       id="export-view-pageLength-controller"
       className="flex justify-between p-5 mt-6 mb-4 border-2 rounded-2xl font-sans"
     >
       <div>
-        <Button variant="outline" size="sm" className="font-semibold">
+        <Button
+          variant="outline"
+          size="sm"
+          className="font-semibold"
+          onClick={downloadJSON}
+        >
           <Download />
           Export in JSON
         </Button>
-        <Button variant="outline" size="sm" className="font-semibold mx-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="font-semibold mx-2"
+          onClick={downloadCSV}
+        >
           <FileCode />
           Export in CSV
         </Button>
       </div>
 
       <div className="flex">
-        <div className="mx-2">
-          <Select>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Page Size" />
-            </SelectTrigger>
-            <SelectContent className="font-sans">
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="75">75</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
+        {/* <div>
           <Select>
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="View" />
@@ -50,7 +77,7 @@ export default function ExportViewControls() {
               <SelectItem value="grid">Grid</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
       </div>
     </div>
   );
