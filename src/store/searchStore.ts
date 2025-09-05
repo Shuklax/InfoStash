@@ -76,5 +76,5 @@ export const useSearchStore = create<SearchState>((set) => ({
     })),
   results: [],
   setResults: (rows) => set({ results: rows }),
-  reset: () => set(initialState),
+  reset: () => set({ ...initialState, results: [] }),
 }));

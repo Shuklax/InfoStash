@@ -14,7 +14,7 @@ export default function Home() {
           </div>
           <main className="col-span-9 mr-6">
             
-              <ExportViewControls />
+              {/* <ExportViewControls /> */}
               <ResultsTable />
               {/* <TechDistribution /> */}
             
