@@ -40,6 +40,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useSearchStore } from "@/store/searchStore"; // ✅ pull from store
+import ExportViewControls from "./ExportViewControls";
 
 // ---- Types ----
 type Company = {
@@ -143,10 +144,11 @@ export default function ResultsTable() {
   });
 
   return (
-    <div className="p-5 border-2 rounded-2xl">
+    <div className="p-5 border-2 rounded-2xl mt-6">
       {/* 🔹 Header: Title + PageSize Select */}
       <div className="flex justify-between items-center mb-3">
         <div className="font-sans font-semibold">Search Results</div>
+        <ExportViewControls />
         <div className="mx-2">
           <Select
             value={String(table.getState().pagination.pageSize)}
@@ -243,23 +245,47 @@ export default function ResultsTable() {
             </PaginationItem>
 
             {/* Page numbers */}
-            {Array.from({ length: table.getPageCount() }).map((_, i) => (
-              <PaginationItem key={i}>
-                <PaginationLink
-                  href="#"
-                  isActive={i === table.getState().pagination.pageIndex}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    table.setPageIndex(i);
-                  }}
-                >
-                  {i + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-
-            {table.getPageCount() > 5 && <PaginationEllipsis />}
-
+            {/* Page numbers with smart pagination */}
+            {(() => {
+              const currentPage = table.getState().pagination.pageIndex;
+              const totalPages = table.getPageCount();
+              const pages: number[] = [];
+              
+              if (totalPages <= 5) {
+                // Show all pages if 5 or fewer
+                for (let i = 0; i < totalPages; i++) {
+                  pages.push(i);
+                }
+              } else {
+                // Smart pagination for more than 5 pages
+                if (currentPage <= 2) {
+                  pages.push(0, 1, 2, 3, -1, totalPages - 1);
+                } else if (currentPage >= totalPages - 3) {
+                  pages.push(0, -1, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1);
+                } else {
+                  pages.push(0, -1, currentPage - 1, currentPage, currentPage + 1, -1, totalPages - 1);
+                }
+              }
+              
+              return pages.map((pageIndex, idx) =>
+                pageIndex === -1 ? (
+                  <PaginationEllipsis key={`ellipsis-${idx}`} />
+                ) : (
+                  <PaginationItem key={pageIndex}>
+                    <PaginationLink
+                      href="#"
+                      isActive={pageIndex === currentPage}
+                      onClick={e => {
+                        e.preventDefault();
+                        table.setPageIndex(pageIndex);
+                      }}
+                    >
+                      {pageIndex + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              );
+            })()}
             {/* Next */}
             <PaginationItem>
               <PaginationNext

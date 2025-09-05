@@ -3,11 +3,16 @@
 import { useSearchStore } from "@/store/searchStore";
 import { Button } from "./ui/button";
 import { Download, FileCode } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ExportViewControls() {
   const results = useSearchStore((state) => state.results);
 
   const downloadJSON = () => {
+    if (!results || results.length === 0) {
+      toast.error("No data available to export");
+      return null;
+    }
     const dataStr = JSON.stringify(results, null, 2);
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
@@ -20,6 +25,10 @@ export default function ExportViewControls() {
   };
 
   const downloadCSV = () => {
+    if (!results || results.length === 0) {
+      toast.error("No data available to export");
+      return null;
+    }
     const replacer = (key: string, value: any) => (value === null ? "" : value);
     const header = Object.keys(results[0] || {});
     const csv = [
@@ -43,7 +52,7 @@ export default function ExportViewControls() {
   return (
     <div
       id="export-view-pageLength-controller"
-      className="flex justify-between p-5 mt-6 mb-4 border-2 rounded-2xl font-sans"
+      className="flex justify-between font-sans"
     >
       <div>
         <Button

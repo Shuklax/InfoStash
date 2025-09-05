@@ -5,42 +5,13 @@ import JSZip from "jszip";
 import Database from "better-sqlite3";
 import { fileURLToPath } from "url";
 import { Kysely, SqliteDialect } from "kysely";
-import { z } from "zod";
 import dayjs from "dayjs";
-import _ from "lodash";
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, "../data.db");
 const DATASET_URL =
   "https://fiber-challenges.s3.us-east-1.amazonaws.com/sample-data.zip";
-
-// --- Schemas ---
-const CompanySchema = z.object({
-  D: z.string(),
-  CN: z.string().nullable().optional(),
-  T: z.union([z.array(z.string()), z.string()]).optional(),
-  C: z.string().nullable().optional(),
-  CAT: z.string().nullable().optional(),
-  ST: z.string().nullable().optional(),
-  CO: z.string().nullable().optional(),
-  Z: z.string().nullable().optional(),
-});
-
-const TechSchema = z.object({
-  Name: z.string(),
-  Category: z.string().nullable().optional(),
-  Premium: z.string().nullable().optional(),
-  Description: z.string().nullable().optional(),
-});
-
-const CompanyTechSchema = z.object({
-  D: z.string(),
-  N: z.string(),
-  FD: z.string().nullable().optional(),
-  LD: z.string().nullable().optional(),
-});
 
 // --- DB Type ---
 interface DB {
@@ -84,22 +55,29 @@ function safeJSONParse(raw: string) {
   return JSON.parse(raw);
 }
 
+// --- Main ---
 async function main() {
   console.log("Downloading dataset...");
+  console.log("Downloading dataset...");
   const res = await fetch(DATASET_URL);
+  if (!res.ok) {
+    throw new Error(`Failed to download dataset: ${res.status} ${res.statusText}`);
+  }
   const buffer = Buffer.from(await res.arrayBuffer());
-
   console.log("Unzipping dataset...");
   const zip = await JSZip.loadAsync(buffer);
 
-  const metaDataBuffer = await zip
-    .file("metaData.sample.json")!
-    .async("uint8array");
-  const techDataBuffer = await zip
-    .file("techData.sample.json")!
-    .async("uint8array");
-  const techIndexRaw = await zip.file("techIndex.sample.json")!.async("string");
-
+  const metaDataFile = zip.file("metaData.sample.json");
+  const techDataFile = zip.file("techData.sample.json");
+  const techIndexFile = zip.file("techIndex.sample.json");
+  
+  if (!metaDataFile || !techDataFile || !techIndexFile) {
+    throw new Error("Required files missing from zip archive");
+  }
+  
+  const metaDataBuffer = await metaDataFile.async("uint8array");
+  const techDataBuffer = await techDataFile.async("uint8array");
+  const techIndexRaw = await techIndexFile.async("string");
   const metaData = decodeUTF16NDJSON(metaDataBuffer);
   const techData = decodeUTF16NDJSON(techDataBuffer);
   const techIndex = safeJSONParse(techIndexRaw);
@@ -142,93 +120,64 @@ async function main() {
     .addColumn("last_detected", "text")
     .execute();
 
+  // --- Insert Companies ---
   console.log("Inserting companies...");
   for (const c of metaData) {
-    const parsed = CompanySchema.safeParse(c);
-    if (!parsed.success) {
-      console.warn("Skipped invalid company", parsed.error.format());
-      continue;
-    }
-
-    const cleanCompany = Object.fromEntries(
-      Object.entries(parsed.data).map(([k, v]) => [k, v === "" ? null : v])
-    ) as Record<string, string | null | string[]>;
-
-    await db
-      .insertInto("companies")
-      .values({
-        domain: cleanCompany.D ?? "", //must be non-null (This is PK)
-        name: cleanCompany.CN ?? null,
-        phone: Array.isArray(cleanCompany.T)
-          ? cleanCompany.T.join(", ")
-          : (cleanCompany.T as string | null),
-        city: cleanCompany.C ?? null,
-        category: cleanCompany.CAT ?? null,
-        state: cleanCompany.ST ?? null,
-        country: cleanCompany.CO ?? null,
-        zipcode: cleanCompany.Z ?? null,
-      })
-      .execute();
+    if (!c.D) continue; // domain is mandatory PK
+    await db.insertInto("companies").values({
+      domain: c.D,
+      name: c.CN || null,
+      phone: Array.isArray(c.T) ? c.T.join(", ") : c.T || null,
+      city: c.C || null,
+      category: c.CAT || null,
+      state: c.ST || null,
+      country: c.CO || null,
+      zipcode: c.Z || null,
+    }).execute();
   }
 
+  // --- Insert Technologies ---
   console.log("Inserting technologies...");
   for (const t of techIndex) {
-    const parsed = TechSchema.safeParse(t);
-    if (!parsed.success) {
-      console.warn("Skipped invalid tech", parsed.error.format());
-      continue;
-    }
-    const cleanTech = _.mapValues(parsed.data, (v) => (v === "" ? null : v));
-    await db.insertInto("technologies").values(cleanTech).execute();
+    if (!t.Name) continue;
+    await db.insertInto("technologies").values({
+      name: t.Name,
+      category: t.Category || null,
+      premium: t.Premium || null,
+      description: t.Description || null,
+    }).execute();
   }
 
-  console.log("Inserting company_tech relationships...");
-  let inserted = 0;
-  let skippedCompanies = 0;
-  let skippedTechs = 0;
+  // --- Build lookup sets ---
+  const companyDomains = new Set(
+    (await db.selectFrom("companies").select("domain").execute()).map((c) => c.domain)
+  );
+  const techNames = new Set(
+    (await db.selectFrom("technologies").select("name").execute()).map((t) => t.name)
+  );
+
+  // --- Insert Company-Tech relationships ---
+  console.log("Inserting company_tech...");
+  let inserted = 0, skippedCompanies = 0, skippedTechs = 0;
 
   for (const c of techData) {
-    if (!CompanySchema.shape.D.safeParse(c.D).success) continue;
-
-    const companyExists = await db
-      .selectFrom("companies")
-      .select("domain")
-      .where("domain", "=", c.D)
-      .executeTakeFirst();
-
-    if (!companyExists) {
+    if (!c.D || !companyDomains.has(c.D)) {
       skippedCompanies++;
       continue;
     }
+    if (!Array.isArray(c.T)) continue;
 
     for (const tech of c.T) {
-      const parsed = CompanyTechSchema.safeParse({ D: c.D, ...tech });
-      if (!parsed.success) {
-        console.warn("Skipped invalid company_tech", parsed.error.format());
-        continue;
-      }
-
-      const techExists = await db
-        .selectFrom("technologies")
-        .select("name")
-        .where("name", "=", tech.N)
-        .executeTakeFirst();
-
-      if (!techExists) {
+      if (!tech.N || !techNames.has(tech.N)) {
         skippedTechs++;
         continue;
       }
-
-      await db
-        .insertInto("company_tech")
-        .values({
-          domain: c.D,
-          tech_name: tech.N,
-          first_detected: tech.FD ? dayjs(tech.FD).toISOString() : null,
-          last_detected: tech.LD ? dayjs(tech.LD).toISOString() : null,
-        })
-        .execute();
-
+      await db.insertInto("company_tech").values({
+        domain: c.D,
+        tech_name: tech.N,
+        first_detected: tech.FD ? dayjs(tech.FD).toISOString() : null,
+        last_detected: tech.LD ? dayjs(tech.LD).toISOString() : null,
+      }).execute();
       inserted++;
     }
   }
