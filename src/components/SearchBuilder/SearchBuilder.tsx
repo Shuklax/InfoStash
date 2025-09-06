@@ -6,6 +6,8 @@ import { CountryFilter } from "./CountryFilter";
 import { CompanyCategoryFilter } from "./CompanyCategoryFilter";
 import { TechnologyFilters } from "./TechnologyFilters";
 import { RunAndReset } from "./RunAndReset";
+import { DomainFilter } from "./DomainFilter";
+import { NameFilter } from "./NameFilter";
 
 export default function SearchBuilder() {
   
@@ -23,6 +25,14 @@ export default function SearchBuilder() {
         </div>
 
         <div className="font-sans mt-4 mb-3">
+          <DomainFilter />
+           
+          <Separator className="my-4" />
+
+          <NameFilter />
+           
+          <Separator className="my-4" />
+
           {/* contains contry based filter */}
           <CountryFilter />
            
