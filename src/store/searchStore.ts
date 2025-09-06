@@ -29,11 +29,15 @@ type SearchState = {
   countryFilter: BaseFilter;
   categoryFilter: BaseFilter;
   numberFilter: NumberFilter;
+  nameFilter: BaseFilter;
+  domainFilter: BaseFilter;
   textQuery: string;
   setTextQuery: (query: string) => void;
   setTechnologyFilter: (filter: BaseFilter) => void;
   setCountryFilter: (filter: BaseFilter) => void;
   setCategoryFilter: (filter: BaseFilter) => void;
+  setNameFilter: (filter: BaseFilter) => void;
+  setDomainFilter: (filter: BaseFilter) => void;
   setNumberFilter: (filter: Partial<NumberFilter>) => void;
   results: Company[];
   setResults: (rows: Company[]) => void;
@@ -49,11 +53,12 @@ const initialBaseFilter: BaseFilter = {
 };
 
 
-
 const initialState = {
   technologyFilter: { ...initialBaseFilter },
   countryFilter: { ...initialBaseFilter },
   categoryFilter: { ...initialBaseFilter },
+  nameFilter: { ...initialBaseFilter },
+  domainFilter: { ...initialBaseFilter },
   numberFilter: { totalTechnologies: 0, technologiesPerCategory: 0 },
    textQuery: "",
 };
@@ -65,6 +70,8 @@ export const useSearchStore = create<SearchState>((set) => ({
   setTechnologyFilter: (filter) => set({ technologyFilter: filter }),
   setCountryFilter: (filter) => set({ countryFilter: filter }),
   setCategoryFilter: (filter) => set({ categoryFilter: filter }),
+  setNameFilter: (filter) => set({ nameFilter: filter }),
+  setDomainFilter: (filter) => set({ domainFilter: filter }),
   setNumberFilter: (filter) =>
     set((state) => ({
       numberFilter: { ...state.numberFilter, ...filter },

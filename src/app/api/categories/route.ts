@@ -11,7 +11,6 @@ const CategorySchema = z.object({
 
 interface DatabaseSchema {
   companies: {
-    country: string | null
     category: string | null
   }
 }

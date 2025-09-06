@@ -3,14 +3,15 @@ import Database from "better-sqlite3";
 import { Kysely, SqliteDialect } from 'kysely'
 import {z} from "zod";
 
-const CountrySchema = z.object({
+// Schema for names of companies
+const NameSchema = z.object({
   value: z.string(),
   label: z.string()
 })
 
 interface DatabaseSchema {
   companies: {
-    country: string | null
+    name: string | null
   }
 }
 
@@ -23,17 +24,18 @@ const db = new Kysely<DatabaseSchema>({
 export async function GET(){
     const rows = await db
       .selectFrom('companies')
-      .select('country')
+      .select('name')
       .distinct()
-      .where('country', 'is not', null)
+      .where('name', 'is not', null)
       .execute()
-    
-    const countries = rows.map(row => ({
-      value: row.country!,
-      label: row.country!
+   
+    const names = rows.map(row => ({
+      value: row.name!,
+      label: row.name!
     }))
-
-    const validatedCountries = z.array(CountrySchema).parse(countries)
     
-    return NextResponse.json(validatedCountries);
+    // Validate names 
+    const validatedNames = z.array(NameSchema).parse(names)
+   
+    return NextResponse.json(validatedNames);
 }
