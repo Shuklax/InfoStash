@@ -1,8 +1,8 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
-import ExportViewControls from "@/components/ExportViewControls";
+//import ExportViewControls from "@/components/ExportViewControls";
 import ResultsTable from "@/components/ResultsTable";
-import TechDistribution from "@/components/TechDistribution";
+//import TechDistribution from "@/components/TechDistribution";
 
 export default function Home() {
   return (
@@ -16,6 +16,8 @@ export default function Home() {
             
               {/* <ExportViewControls /> */}
               <ResultsTable />
+
+              {/* Future Feature: If we wanna show a graphical distribution of the tech in the search results */}
               {/* <TechDistribution /> */}
             
           </main>

@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/pagination";
 import { useSearchStore } from "@/store/searchStore"; // ✅ pull from store
 import ExportViewControls from "./ExportViewControls";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 // ---- Types ----
 type Company = {
@@ -126,7 +127,6 @@ export default function ResultsTable() {
   const results = useSearchStore((state) => state.results);
   const [globalFilter, setGlobalFilter] = React.useState("");
 
-
   const table = useReactTable({
     data: results,
     columns,
@@ -144,9 +144,9 @@ export default function ResultsTable() {
   });
 
   return (
-    <div className="p-5 border-2 rounded-2xl mt-6">
+    <div className="p-5 border-2 rounded-2xl mt-6 flex flex-col h-[88vh]">
       {/* 🔹 Header: Title + PageSize Select */}
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-3 flex-shrink-0">
         <div className="font-sans font-semibold">Search Results</div>
         <ExportViewControls />
         <div className="mx-2">
@@ -173,59 +173,70 @@ export default function ResultsTable() {
         placeholder="Filter results..."
         value={globalFilter ?? ""}
         onChange={(e) => setGlobalFilter(e.target.value)}
-        className="max-w-sm mb-4"
+        className="max-w-sm mb-4 flex-shrink-0"
       />
 
       {/* Table */}
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
+      {/* Table Container - This will take remaining space */}
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="rounded-md border flex flex-col h-full">
+          {/* Fixed Table Header */}
+          <div className="flex-shrink-0">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id} className="w-[15%]">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
-          </TableHeader>
+              </TableHeader>
+            </Table>
+          </div>
 
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+          {/* Scrollable Table Body */}
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableBody>
+                {table.getRowModel().rows.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} className="content-start">
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="w-[17%]">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-end pt-4">
+      <div className="flex justify-end pt-4 flex-shrink-0">
         <Pagination>
           <PaginationContent>
             {/* Prev */}
@@ -250,7 +261,7 @@ export default function ResultsTable() {
               const currentPage = table.getState().pagination.pageIndex;
               const totalPages = table.getPageCount();
               const pages: number[] = [];
-              
+
               if (totalPages <= 5) {
                 // Show all pages if 5 or fewer
                 for (let i = 0; i < totalPages; i++) {
@@ -261,12 +272,27 @@ export default function ResultsTable() {
                 if (currentPage <= 2) {
                   pages.push(0, 1, 2, 3, -1, totalPages - 1);
                 } else if (currentPage >= totalPages - 3) {
-                  pages.push(0, -1, totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1);
+                  pages.push(
+                    0,
+                    -1,
+                    totalPages - 4,
+                    totalPages - 3,
+                    totalPages - 2,
+                    totalPages - 1
+                  );
                 } else {
-                  pages.push(0, -1, currentPage - 1, currentPage, currentPage + 1, -1, totalPages - 1);
+                  pages.push(
+                    0,
+                    -1,
+                    currentPage - 1,
+                    currentPage,
+                    currentPage + 1,
+                    -1,
+                    totalPages - 1
+                  );
                 }
               }
-              
+
               return pages.map((pageIndex, idx) =>
                 pageIndex === -1 ? (
                   <PaginationEllipsis key={`ellipsis-${idx}`} />
@@ -275,7 +301,7 @@ export default function ResultsTable() {
                     <PaginationLink
                       href="#"
                       isActive={pageIndex === currentPage}
-                      onClick={e => {
+                      onClick={(e) => {
                         e.preventDefault();
                         table.setPageIndex(pageIndex);
                       }}
