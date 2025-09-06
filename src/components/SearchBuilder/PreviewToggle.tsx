@@ -37,7 +37,7 @@ export function PreviewToggle(){
           <pre className="text-sm overflow-x-auto whitespace-pre">
             <code className="language-json">
               {JSON.stringify(searchObject, null, 2)}
-            </code>
+            </code>           
           </pre>
         </div>
       )}

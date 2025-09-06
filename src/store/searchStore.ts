@@ -3,9 +3,9 @@ import { create } from "zustand";
 type FilterType = "together" | "individual";
 
 type BaseFilter = {
-  and: string[];
-  or: string[];
-  none: string[];
+  and: string[]; //items that MUST be present
+  or: string[]; //items where ANY can be present
+  none: string[]; //Items that MUST NOT be present
   removeDuplicates: boolean;
   filteringType: FilterType;
 };
@@ -15,11 +15,22 @@ type NumberFilter = {
   technologiesPerCategory: number;
 };
 
+export type Company = {
+  name: string | null;
+  domain: string;
+  category: string | null;
+  country: string | null;
+  technologies: number;
+  city: string | null;
+};
+
 type SearchState = {
   technologyFilter: BaseFilter;
   countryFilter: BaseFilter;
   categoryFilter: BaseFilter;
   numberFilter: NumberFilter;
+  textQuery: string;
+  setTextQuery: (query: string) => void;
   setTechnologyFilter: (filter: BaseFilter) => void;
   setCountryFilter: (filter: BaseFilter) => void;
   setCategoryFilter: (filter: BaseFilter) => void;
@@ -37,36 +48,20 @@ const initialBaseFilter: BaseFilter = {
   filteringType: "together",
 };
 
-const initialState: Omit<
-  SearchState,
-  | "setTechnologyFilter"
-  | "setCountryFilter"
-  | "setCategoryFilter"
-  | "setNumberFilter"
-  | "reset"
-  | "results"
-  | "setResults"
-> = {
+
+
+const initialState = {
   technologyFilter: { ...initialBaseFilter },
   countryFilter: { ...initialBaseFilter },
   categoryFilter: { ...initialBaseFilter },
-  numberFilter: {
-    totalTechnologies: 0,
-    technologiesPerCategory: 0,
-  },
-};
-
-export type Company = {
-  name: string | null;
-  domain: string;
-  category: string | null;
-  country: string | null;
-  technologies: number;
-  city: string | null;
+  numberFilter: { totalTechnologies: 0, technologiesPerCategory: 0 },
+   textQuery: "",
 };
 
 export const useSearchStore = create<SearchState>((set) => ({
   ...initialState,
+   // NEW: Text query setter
+  setTextQuery: (query) => set({ textQuery: query }),
   setTechnologyFilter: (filter) => set({ technologyFilter: filter }),
   setCountryFilter: (filter) => set({ countryFilter: filter }),
   setCategoryFilter: (filter) => set({ categoryFilter: filter }),
