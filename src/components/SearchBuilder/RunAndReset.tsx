@@ -21,6 +21,14 @@ export function RunAndReset() {
 
       console.log("Search Results:", result);
       setResults(result.data ?? []); // push into store
+
+      // Save to localStorage for internal searches
+      const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");
+      history.push({
+        searchObject: searchState,
+        timestamp: new Date().toISOString(),
+      });
+      localStorage.setItem("searchHistory", JSON.stringify(history));
     } catch (err) {
       console.error("Error running search:", err);
     }

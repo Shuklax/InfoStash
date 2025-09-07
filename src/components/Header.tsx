@@ -5,8 +5,13 @@ import { useEffect, useRef } from "react";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Command } from "lucide-react";
+import { Button } from "./ui/button";
+import { useSearchHistoryStore } from "@/store/searchStore";
 
 export default function Header() {
+  const historySheetOpen = useSearchHistoryStore((state) => state.historySheetOpen)
+  const setHistorySheetOpen = useSearchHistoryStore((state) => state.setHistorySheetOpen)
+
   const [hasData, setHasData] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -56,10 +61,16 @@ export default function Header() {
             ref={inputRef}
             placeholder="Search companies, domains or technologies"
             className="w-64"
-          /> <span className="inline-flex opacity-50 ml-3 self-center">ctrl+k / <Command className="size-4 self-center"/>k</span>
+          />{" "}
+          <span className="inline-flex opacity-50 ml-3 self-center">
+            ctrl+k / <Command className="size-4 self-center" />k
+          </span>
         </div>
         <div className="mr-10 font-sans font-semibold">
           {hasData ? "Dataset Loaded" : "No Dataset Loaded"}
+        </div>
+        <div >
+          <Button variant="outline" className="mr-4 font-semibold border-2" onClick={()=> setHistorySheetOpen(!historySheetOpen)}>Search History</Button>
         </div>
       </div>
     </header>

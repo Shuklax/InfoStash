@@ -39,9 +39,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useSearchStore } from "@/store/searchStore"; // ✅ pull from store
+import { useSearchStore } from "@/store/searchStore"; // pull from store
 import ExportViewControls from "./ExportViewControls";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 // ---- Types ----
 type Company = {
@@ -138,7 +137,7 @@ export default function ResultsTable() {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10, // default page size
+        pageSize: 50, // default page size
       },
     },
   });
