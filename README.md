@@ -22,6 +22,23 @@ npm run build
 ```
 
 Then open <http://localhost:3000> to see your site.
+---------------------------------------------------------------------
+
+# Run through Dockerfile
+
+After cloning the Repo locally
+
+Build the image locally
+
+```bash
+docker build -t my-next-app .
+```
+
+Run the container
+
+```bash
+docker run -p 3000:3000 my-next-app
+```
 
 ---------------------------------------------------------------------
 # InfoStash Search API
@@ -31,7 +48,7 @@ https://your-domain.com/api
 
 ## Single Endpoint
 
-**POST** `/api/search`
+**POST** `/search`
 
 Search companies using structured filters.
 
