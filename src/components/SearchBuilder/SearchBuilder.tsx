@@ -25,10 +25,12 @@ export default function SearchBuilder() {
         </div>
 
         <div className="font-sans mt-4 mb-3">
+          {/* contains domain based filter */}
           <DomainFilter />
            
           <Separator className="my-4" />
 
+          {/* contains name based filter */}
           <NameFilter />
            
           <Separator className="my-4" />
