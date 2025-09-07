@@ -124,6 +124,7 @@ const columns: ColumnDef<Company>[] = [
 
 export default function ResultsTable() {
   const results = useSearchStore((state) => state.results);
+  console.log(results)
   const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({

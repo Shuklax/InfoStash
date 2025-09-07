@@ -6,23 +6,27 @@ import { runSearch, type SearchObject } from "@/server/lib/searchBuilder";
 // Type for the request body (can include textQuery for internal requests)
 interface SearchRequestBody extends SearchObject {
   textQuery?: string; // Optional for internal requests
+  searchObject?: SearchObject; // External calls may wrap filters
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json() as SearchRequestBody;
+
+    // Normalize: support both { ...filters } and { searchObject: { ...filters } }
+    const normalized = (body.searchObject ?? body) as SearchRequestBody;
     
     // Determine if internal (from your store) or external (API consumer)
-    const isInternal = body.textQuery !== undefined; // Internal calls may have textQuery
+    const isInternal = normalized.textQuery !== undefined; // Internal calls may have textQuery
     
     // Create search object (remove textQuery if present)
     const searchObject: SearchObject = {
-      technologyFilter: body.technologyFilter,
-      countryFilter: body.countryFilter,
-      categoryFilter: body.categoryFilter,
-      nameFilter: body.nameFilter,
-      domainFilter: body.domainFilter,
-      numberFilter: body.numberFilter
+      technologyFilter: normalized.technologyFilter,
+      countryFilter: normalized.countryFilter,
+      categoryFilter: normalized.categoryFilter,
+      nameFilter: normalized.nameFilter,
+      domainFilter: normalized.domainFilter,
+      numberFilter: normalized.numberFilter
     };
     
     console.log('Search request:', { 
