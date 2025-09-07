@@ -1,5 +1,5 @@
-// src/lib/search.ts
-import { Kysely, sql, ExpressionBuilder } from "kysely";
+// src/server/lib/searchBuilder.ts
+import { Kysely, sql } from "kysely";
 import type { DB } from "@/types/schema";
 
 type FilterType = "together" | "individual";
@@ -21,6 +21,8 @@ export interface SearchObject {
   technologyFilter: BaseFilterBridge;
   countryFilter: BaseFilterBridge;
   categoryFilter: BaseFilterBridge;
+  nameFilter: BaseFilterBridge;      // NEW
+  domainFilter: BaseFilterBridge;    // NEW
   numberFilter: NumberFilterBridge;
 }
 
@@ -50,10 +52,16 @@ export async function runSearch(
     search.categoryFilter.and.length > 0 ||
     search.categoryFilter.or.length > 0 ||
     search.categoryFilter.none.length > 0 ||
+    search.nameFilter.and.length > 0 ||      // NEW
+    search.nameFilter.or.length > 0 ||       // NEW
+    search.nameFilter.none.length > 0 ||     // NEW
+    search.domainFilter.and.length > 0 ||    // NEW
+    search.domainFilter.or.length > 0 ||     // NEW
+    search.domainFilter.none.length > 0 ||   // NEW
     search.numberFilter.totalTechnologies > 0 ||
     search.numberFilter.technologiesPerCategory > 0;
 
-  // If no filters, return all companies with their tech counts (that'a why leftJoin)
+  // If no filters, return all companies
   if (!hasFilters) {
     const rows = await db
       .selectFrom("companies")
@@ -78,24 +86,20 @@ export async function runSearch(
     return rows.map((r) => ({ ...r, technologies: Number(r.technologies) }));
   }
 
-  // Build domain sets for each filter type if filters exists
-  const [techDomains, countryDomains, categoryDomains] = await Promise.all([
-    //Queries the DB for domains (websites/records) that pass the provided technology and number filters.
+  // Build domain sets for each filter type
+  const [techDomains, countryDomains, categoryDomains, nameDomains, domainDomains] = await Promise.all([
     buildTechDomainSet(db, search.technologyFilter, search.numberFilter),
-    //Queries the DB for domains matching a given country filter.
     buildSimpleFieldDomainSet(db, "companies.country", search.countryFilter),
-    //Queries the DB for domains matching a given category filter.
     buildSimpleFieldDomainSet(db, "companies.category", search.categoryFilter),
+    buildSimpleFieldDomainSet(db, "companies.name", search.nameFilter),        // NEW
+    buildSimpleFieldDomainSet(db, "companies.domain", search.domainFilter),    // NEW
   ]);
 
-  //filters out any elements that is null
-  //after filtering every element in domainSets is guranteed to be of type DomainRow[], not null
-  const domainSets = [techDomains, countryDomains, categoryDomains].filter(
+  // Filter out nulls and intersect all domain sets
+  const domainSets = [techDomains, countryDomains, categoryDomains, nameDomains, domainDomains].filter(
     (d): d is DomainRow[] => d !== null
   );
 
-  // build sets and intersects them
-  //Get all domain names that match all the provided filters (AND logic).
   let finalDomainSet: Set<string> | null = null;
   if (domainSets.length > 0) {
     finalDomainSet = domainSets
@@ -108,10 +112,10 @@ export async function runSearch(
     if (finalDomainSet.size === 0) return [];
   }
 
-  //Fetch every company, even those with no linked technologies (LEFT JOIN)
+  // Build final query
   let q = db
     .selectFrom("companies")
-    .leftJoin("company_tech", "companies.domain", "company_tech.domain") // Changed to LEFT JOIN
+    .leftJoin("company_tech", "companies.domain", "company_tech.domain")
     .leftJoin("technologies", "company_tech.tech_name", "technologies.name")
     .select((eb) => [
       eb.ref("companies.domain").as("domain"),
@@ -129,15 +133,13 @@ export async function runSearch(
       "companies.city",
     ]);
 
-  //adds a WHERE IN clause to the Kysely query to filter companies by domain,
-  // based on the previously calculated finalDomainSet
   if (finalDomainSet) {
     const list = Array.from(finalDomainSet);
     if (list.length === 0) return [];
     q = q.where("companies.domain", "in", list);
   }
 
-  //Filters out groups (companies) that have fewer than totalTechnologies.
+  // Apply number filters
   if (search.numberFilter?.totalTechnologies > 0) {
     q = q.having(
       sql`COUNT(company_tech.tech_name)`,
@@ -147,22 +149,13 @@ export async function runSearch(
   }
 
   if (search.numberFilter?.technologiesPerCategory > 0) {
-    //This subquery checks if a company has at least technologiesPerCategory number of technologies within each category.
     q = q.where(({ exists, selectFrom, ref }) =>
       exists(
         selectFrom("company_tech")
-        //join company_tech with technologies to get technology info per company.
-          .innerJoin(
-            "technologies",
-            "company_tech.tech_name",
-            "technologies.name"
-          )
+          .innerJoin("technologies", "company_tech.tech_name", "technologies.name")
           .select(sql`1`.as("x"))
-          //links subquery to the outer query company row by domain.
           .whereRef("company_tech.domain", "=", ref("companies.domain"))
-          //groups by technology category to count technologies per category per company.
           .groupBy("technologies.category")
-          //filters grouped categories with count equal or above the threshold.
           .having(
             sql`COUNT(technologies.name)`,
             ">=",
@@ -176,9 +169,7 @@ export async function runSearch(
   return rows.map((r) => ({ ...r, technologies: Number(r.technologies) }));
 }
 
-
-/* Helpers for building domain sets based on different filters */
-
+// Helper functions (keeping existing ones + adding support for name/domain)
 async function buildTechDomainSet(
   db: Kysely<DB>,
   filter: BaseFilterBridge,
@@ -214,9 +205,7 @@ async function buildTechDomainTogether(
 
   if (filter.and.length > 0) {
     q = q.having(
-      sql`COUNT(DISTINCT CASE WHEN ${sql.ref(
-        "technologies.name"
-      )} IN (${sql.join(filter.and)}) 
+      sql`COUNT(DISTINCT CASE WHEN ${sql.ref("technologies.name")} IN (${sql.join(filter.and)}) 
         THEN ${sql.ref("technologies.name")} END)`,
       ">=",
       filter.and.length
@@ -225,9 +214,7 @@ async function buildTechDomainTogether(
 
   if (filter.or.length > 0) {
     q = q.having(
-      sql`COUNT(DISTINCT CASE WHEN ${sql.ref(
-        "technologies.name"
-      )} IN (${sql.join(filter.or)}) 
+      sql`COUNT(DISTINCT CASE WHEN ${sql.ref("technologies.name")} IN (${sql.join(filter.or)}) 
         THEN ${sql.ref("technologies.name")} END)`,
       ">=",
       1
@@ -235,7 +222,6 @@ async function buildTechDomainTogether(
   }
 
   if (filter.none.length > 0) {
-    // NOT EXISTS subquery for excluded techs
     q = q.where(({ not, exists, selectFrom, ref }) =>
       not(
         exists(
@@ -244,35 +230,6 @@ async function buildTechDomainTogether(
             .whereRef("company_tech.domain", "=", ref("companies.domain"))
             .where("company_tech.tech_name", "in", filter.none)
         )
-      )
-    );
-  }
-
-  if (number?.totalTechnologies > 0) {
-    q = q.having(
-      sql`COUNT(${sql.ref("technologies.name")})`,
-      ">=",
-      number.totalTechnologies
-    );
-  }
-
-  if (number?.technologiesPerCategory > 0) {
-    q = q.where(({ exists, selectFrom, ref }) =>
-      exists(
-        selectFrom("company_tech")
-          .innerJoin(
-            "technologies",
-            "company_tech.tech_name",
-            "technologies.name"
-          )
-          .select(sql`1`.as("x"))
-          .whereRef("company_tech.domain", "=", ref("companies.domain"))
-          .groupBy("technologies.category")
-          .having(
-            sql`COUNT(${sql.ref("technologies.name")})`,
-            ">=",
-            number.technologiesPerCategory
-          )
       )
     );
   }
@@ -287,7 +244,6 @@ async function buildTechDomainIndividual(
 ): Promise<DomainRow[]> {
   const subSets: DomainRow[][] = [];
 
-  // AND + OR → positive matches
   for (const t of [...filter.and, ...filter.or]) {
     const rows = await db
       .selectFrom("company_tech")
@@ -298,7 +254,6 @@ async function buildTechDomainIndividual(
     subSets.push(rows);
   }
 
-  // NONE → exclude matches
   for (const t of filter.none) {
     const rows = await db
       .selectFrom("companies")
@@ -317,52 +272,8 @@ async function buildTechDomainIndividual(
     subSets.push(rows);
   }
 
-  // If only number filters are active
-  if (
-    subSets.length === 0 &&
-    ((number?.totalTechnologies ?? 0) > 0 ||
-      (number?.technologiesPerCategory ?? 0) > 0)
-  ) {
-    const rows = await db
-      .selectFrom("companies")
-      .innerJoin("company_tech", "companies.domain", "company_tech.domain")
-      .innerJoin("technologies", "company_tech.tech_name", "technologies.name")
-      .select("companies.domain")
-      .groupBy("companies.domain")
-      .$if(number.totalTechnologies > 0, (qb) =>
-        qb.having(
-          sql`COUNT(${sql.ref("technologies.name")})`,
-          ">=",
-          number.totalTechnologies
-        )
-      )
-      .$if(number.technologiesPerCategory > 0, (qb) =>
-        qb.where(({ exists, selectFrom, ref }) =>
-          exists(
-            selectFrom("company_tech")
-              .innerJoin(
-                "technologies",
-                "company_tech.tech_name",
-                "technologies.name"
-              )
-              .select(sql`1`.as("x"))
-              .whereRef("company_tech.domain", "=", ref("companies.domain"))
-              .groupBy("technologies.category")
-              .having(
-                sql`COUNT(${sql.ref("technologies.name")})`,
-                ">=",
-                number.technologiesPerCategory
-              )
-          )
-        )
-      )
-      .execute();
-    subSets.push(rows);
-  }
-
   if (subSets.length === 0) return [];
 
-  // Merge + deduplicate if needed
   let merged = subSets.flat();
   if (filter.removeDuplicates) {
     const seen = new Set<string>();
@@ -376,7 +287,7 @@ async function buildTechDomainIndividual(
 
 async function buildSimpleFieldDomainSet(
   db: Kysely<DB>,
-  column: "companies.country" | "companies.category",
+  column: "companies.country" | "companies.category" | "companies.name" | "companies.domain",
   filter: BaseFilterBridge
 ): Promise<DomainRow[] | null> {
   const hasAny =
@@ -425,4 +336,3 @@ async function buildSimpleFieldDomainSet(
 
   return merged;
 }
-// Note: The above helper functions can be further optimized. This is a basic implementation.
