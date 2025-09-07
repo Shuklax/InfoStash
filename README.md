@@ -21,8 +21,7 @@ To check that your code compiles successfully:
 npm run build
 ```
 
-Then open <http://localhost:3000> to see your site.
----------------------------------------------------------------------
+## Then open <http://localhost:3000> to see your site.
 
 # Run through Dockerfile
 
@@ -31,19 +30,24 @@ After cloning the Repo locally
 Build the image locally
 
 ```bash
-docker build -t my-next-app .
+docker build -t infostash:0.1.0 .
 ```
 
 Run the container
 
 ```bash
-docker run -p 3000:3000 my-next-app
+docker run -p 3000:3000 \
+  -e OPENROUTER_API_KEY="your-api-key-here" \
+  infostash
+
 ```
 
----------------------------------------------------------------------
+---
+
 # InfoStash Search API
 
 ## Base URL
+
 https://your-domain.com/api
 
 ## Single Endpoint
@@ -103,7 +107,7 @@ Send a JSON object with these filters:
 ## Filter Logic
 
 - **`and`**: ALL items must be present
-- **`or`**: ANY item can be present  
+- **`or`**: ANY item can be present
 - **`none`**: NO items can be present
 - **`filteringType`**: Use `"together"` (recommended)
 - **`totalTechnologies`**: Minimum total techs required
@@ -118,7 +122,7 @@ Send a JSON object with these filters:
     {
       "domain": "google.com",
       "name": "Google",
-      "category": "Technology", 
+      "category": "Technology",
       "country": "US",
       "city": "Mountain View",
       "technologies": 15
@@ -132,6 +136,7 @@ Send a JSON object with these filters:
 ## Example Usage
 
 ### Find React companies in US:
+
 ```json
 {
   "technologyFilter": {
@@ -177,6 +182,7 @@ Send a JSON object with these filters:
 ```
 
 ### Find large tech companies (not Facebook):
+
 ```json
 {
   "technologyFilter": {
