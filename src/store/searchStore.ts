@@ -65,7 +65,7 @@ const initialState = {
 
 export const useSearchStore = create<SearchState>((set) => ({
   ...initialState,
-   // NEW: Text query setter
+   //Text query setter
   setTextQuery: (query) => set({ textQuery: query }),
   setTechnologyFilter: (filter) => set({ technologyFilter: filter }),
   setCountryFilter: (filter) => set({ countryFilter: filter }),
@@ -80,3 +80,16 @@ export const useSearchStore = create<SearchState>((set) => ({
   setResults: (rows) => set({ results: rows }),
   reset: () => set({ ...initialState, results: [] }),
 }));
+
+
+type HistoryState = {
+  history: []
+  historySheetOpen: boolean;
+  setHistorySheetOpen: (open: boolean) => void;
+};
+
+export const useSearchHistoryStore = create<HistoryState>((set)=>({
+  history: [],
+  historySheetOpen: false,
+  setHistorySheetOpen: (open)=> set({historySheetOpen: open})
+}))

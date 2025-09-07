@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 //import ExportViewControls from "@/components/ExportViewControls";
 import ResultsTable from "@/components/ResultsTable";
+import { SearchHistory } from "@/components/SearchHistory";
 //import TechDistribution from "@/components/TechDistribution";
 
 export default function Home() {
@@ -19,8 +20,9 @@ export default function Home() {
 
               {/* Future Feature: If we wanna show a graphical distribution of the tech in the search results */}
               {/* <TechDistribution /> */}
-            
+
           </main>
+          <SearchHistory/>
         </div>
     </div>
   );
