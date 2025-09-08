@@ -9,6 +9,16 @@ Make sure you've installed Node.js (version 22+). Then run:
 npm install
 ```
 
+Create a DB file named data.db in the root
+
+To setup the dataset:
+
+```bash
+npm run setup
+```
+
+Create a env file as given in the example with your openRouter API_KEY
+
 To run your server:
 
 ```bash
