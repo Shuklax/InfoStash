@@ -21,8 +21,7 @@ describe("POST /api/search", () => {
     });
     const res = await POST(req as any);
     const json: any = await (res as any).json();
-    expect(json.success).toBe(true);
-    expect(json.source).toBe("internal");
+    expect(json.success).toBe(true);;
     expect(json.data[0].domain).toBe("example.com");
   });
 });

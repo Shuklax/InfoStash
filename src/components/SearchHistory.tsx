@@ -51,7 +51,7 @@ export function SearchHistory() {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="grid flex-1 auto-rows-min gap-6 px-4">
+        <div className="flex-1 overflow-y-auto px-4">
           {history.length > 0 ? (
             <Accordion type="single" collapsible className="w-full">
               {history.map((entry, index) => (
@@ -68,16 +68,15 @@ export function SearchHistory() {
               ))}
             </Accordion>
           ) : (
-            <p className="text-gray-500 text-sm">
-              No searches saved yet.
-            </p>
+            <p className="text-gray-500 text-sm">No searches saved yet.</p>
           )}
         </div>
 
         <SheetFooter>
           <SheetClose asChild>
-            <Button variant="outline">Close</Button>
+            <Button className="font-semibold font-sans">Close</Button>
           </SheetClose>
+          <Button variant="destructive" className="font-semibold font-sans">Clear History</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

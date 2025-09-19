@@ -11,13 +11,12 @@ interface SearchRequestBody extends SearchObject {
 
 export async function POST(req: Request) {
   try {
+    console.log("body")
     const body = await req.json() as SearchRequestBody;
-
+    console.log(body)
     // Normalize: support both { ...filters } and { searchObject: { ...filters } }
     const normalized = (body.searchObject ?? body) as SearchRequestBody;
     
-    // Determine if internal (from your store) or external (API consumer)
-    const isInternal = normalized.textQuery !== undefined; // Internal calls may have textQuery
     
     // Create search object (remove textQuery if present)
     const searchObject: SearchObject = {
@@ -28,23 +27,6 @@ export async function POST(req: Request) {
       domainFilter: normalized.domainFilter,
       numberFilter: normalized.numberFilter
     };
-    
-    console.log('Search request:', { 
-      type: isInternal ? 'internal' : 'external',
-      hasFilters: Object.values(searchObject).some(filter => {
-        if (filter && typeof filter === 'object') {
-          // Check BaseFilter properties
-          if ('and' in filter && 'or' in filter && 'none' in filter) {
-            return filter.and.length > 0 || filter.or.length > 0 || filter.none.length > 0;
-          }
-          // Check NumberFilter properties  
-          if ('totalTechnologies' in filter && 'technologiesPerCategory' in filter) {
-            return filter.totalTechnologies > 0 || filter.technologiesPerCategory > 0;
-          }
-        }
-        return false;
-      })
-    });
 
     // Always call runSearch - your single source of truth
     const data = await runSearch(db, searchObject);
@@ -53,7 +35,6 @@ export async function POST(req: Request) {
       success: true, 
       data,
       totalResults: data.length,
-      source: isInternal ? 'internal' : 'external'
     });
     
   } catch (err) {
@@ -61,6 +42,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
       success: false, 
       error: "Internal Server Error",
+      //checks if err is an instance of the Error class and returns the message, 
+      //otherwise returns 'Unknown error'
       details: err instanceof Error ? err.message : 'Unknown error'
     }, { status: 500 });
   }

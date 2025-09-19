@@ -9,22 +9,26 @@ import { Button } from "./ui/button";
 import { useSearchHistoryStore, useSearchStore } from "@/store/searchStore";
 
 export default function Header() {
+  //getting the state of the search history sheet from the zustand store
   const historySheetOpen = useSearchHistoryStore(
     (state) => state.historySheetOpen
   );
+  //function to toggle the state of the search history sheet in the zustand store
   const setHistorySheetOpen = useSearchHistoryStore(
     (state) => state.setHistorySheetOpen
   );
 
   const [hasData, setHasData] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const setFiltersFromLLM = useSearchStore((s) => s.setFiltersFromLLM);
-  const setResults = useSearchStore((s) => s.setResults);
+
+  //alternative way (useSearchStore.getState()) is already used so we don't need this
+  //const setFiltersFromLLM = useSearchStore((s) => s.setFiltersFromLLM);
 
   useEffect(() => {
     const checkStatus = () => {
       fetch("/api/db-status")
         .then((r) => r.json())
+        //producing a boolean value to indicate if data is present
         .then((data) => setHasData(data.hasData));
     };
 
@@ -32,7 +36,7 @@ export default function Header() {
     checkStatus();
 
     // Poll every 3 seconds
-    const interval = setInterval(checkStatus, 3000);
+    //const interval = setInterval(checkStatus, 3000);
 
     // Cleanup
     return () => clearInterval(interval);
@@ -57,6 +61,7 @@ export default function Header() {
   }, []);
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    //checks if the pressed key is "Enter" and if the inputRef has a value
     if (e.key === "Enter" && inputRef.current?.value) {
       const text = inputRef.current.value;
 
@@ -68,18 +73,19 @@ export default function Header() {
       const parsed = await res.json();
 
       // 2. Store filters in global store
-      setFiltersFromLLM(parsed);
+      useSearchStore.getState().setFiltersFromLLM(parsed);
 
       // 3. Immediately trigger search
       const searchRes = await fetch("/api/search", {
         method: "POST",
-        body: JSON.stringify({ searchObject: parsed }),
+        body: JSON.stringify({ searchObject : parsed }),
       });
       const jsonData = await searchRes.json();
 
-      // normalize
+      //structure the response to ensure it fits the expected format + fallback
       const rows = Array.isArray(jsonData) ? jsonData : jsonData.data ?? [];
 
+      // 4. Store results in global store
       useSearchStore.getState().setResults(rows);
     }
   };
