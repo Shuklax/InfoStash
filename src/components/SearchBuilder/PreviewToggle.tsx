@@ -10,6 +10,9 @@ export function PreviewToggle(){
   //Pull the entire global search state from zustand
   const searchObject = useSearchStore((state)=>state);
 
+  // Remove the 'results' and 'textQuery' property before displaying
+  const { results, textQuery, ...searchWithoutResults } = searchObject;
+
   // copy function
   const handleCopy = () => {
     navigator.clipboard.writeText(JSON.stringify(searchObject, null, 2));
@@ -36,7 +39,7 @@ export function PreviewToggle(){
         <div className="bg-gray-100 w-full h-auto my-3 rounded-lg p-4">
           <pre className="text-sm overflow-x-auto whitespace-pre">
             <code className="language-json">
-              {JSON.stringify(searchObject, null, 2)}
+              {JSON.stringify(searchWithoutResults, null, 2)}
             </code>           
           </pre>
         </div>

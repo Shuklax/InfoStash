@@ -59,7 +59,7 @@ export default function SearchBuilder() {
 
           {/* Shows a live preview of the search object being built above.
           If you hit "run search", the search results will also be shown below. */}
-          {/* <PreviewToggle /> */}
+          <PreviewToggle />
         </div>
 
       </ScrollArea>
