@@ -26,16 +26,22 @@ const SearchObjectSchema = z.object({
   numberFilter: NumberFilterSchema
 });
 
+// Main search endpoint
+//defines "searchRouter" with one procedure "search"
 export const searchRouter = router({
-  // Main search endpoint
   search: publicProcedure
+    //validates input against "SearchObjectSchema"
     .input(SearchObjectSchema)
+    //mutation is a procedure that creates, deletes or updates data
     .mutation(async ({ input }) => {
+      //measures the time it takes to run the search
       const startTime = Date.now();
       
+      //runs the search logic "runSearch" using database and input filters
       const results = await runSearch(db, input);
       const executionTime = Date.now() - startTime;
       
+      //returns the structred response with success, data, total results, and time.
       return {
         success: true,
         data: results,
@@ -45,4 +51,5 @@ export const searchRouter = router({
     }),
 });
 
+//exports the typescript ytpe "searchRouter" for client/server type safety
 export type SearchRouter = typeof searchRouter;

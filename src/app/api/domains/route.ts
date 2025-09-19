@@ -3,11 +3,12 @@ import Database from "better-sqlite3";
 import { Kysely, SqliteDialect } from 'kysely'
 import {z} from "zod";
 
-// Schema for domains of companies
+// Schema for domain validation (we're gonna get an array of these)
 const DomainSchema = z.object({
   value: z.string(),
   label: z.string()
 })
+
 
 interface DatabaseSchema {
   companies: {
@@ -15,6 +16,8 @@ interface DatabaseSchema {
   }
 }
 
+//initialize the DB instance using better-sqlite3
+//we initialize an instance as we have to do DB operations (we have to get domains data)
 const db = new Kysely<DatabaseSchema>({
   dialect: new SqliteDialect({
     database: new Database('data.db')

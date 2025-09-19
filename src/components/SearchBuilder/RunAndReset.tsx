@@ -6,10 +6,10 @@ import { Button } from "../ui/button";
 export function RunAndReset() {
   const reset = useSearchStore((state) => state.reset);
   const searchState = useSearchStore((state) => state);
-  const setResults = useSearchStore((state) => state.setResults);
 
   const handleRunSearch = async () => {
     try {
+      // Call the search API with the current search state
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -20,7 +20,7 @@ export function RunAndReset() {
       const result = await response.json();
 
       console.log("Search Results:", result);
-      setResults(result.data ?? []); // push into store
+      useSearchStore.getState().setResults(result.data ?? []); // push into store
 
       // Save to localStorage for internal searches
       const history = JSON.parse(localStorage.getItem("searchHistory") || "[]");

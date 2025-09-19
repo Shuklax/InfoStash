@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useSearchStore } from "../../store/searchStore";
 
 export function PreviewToggle(){
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   //Pull the entire global search state from zustand
   const searchObject = useSearchStore((state)=>state);

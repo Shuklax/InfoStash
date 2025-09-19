@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 
+// Initialize the OpenAI client with OpenRouter settings
 const client = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
@@ -30,6 +31,7 @@ Strict rules for parsing:
 - Never merge entity type and category. ("Fintech startups" -> "Fintech").
 `;
 
+  // Send the request to OpenAI's chat completion endpoint
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
