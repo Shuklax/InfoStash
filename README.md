@@ -1,3 +1,4 @@
+
 ## Setup
 
 Make sure you've installed Node.js (version 22+). Then run:
