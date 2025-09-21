@@ -1,4 +1,3 @@
-
 ## Setup
 
 Make sure you've installed Node.js (version 22+). Then run:
@@ -49,9 +48,10 @@ docker run -p 3000:3000 \
   infostash
 
 ```
+---
+<img width="673" height="820" alt="image" src="https://github.com/user-attachments/assets/b7c9f81e-c65c-4a8e-984c-d7a46f715a7f" />
 
 ---
-
 # InfoStash Search API
 
 ## Base URL
