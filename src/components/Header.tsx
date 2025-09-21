@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { Command } from "lucide-react";
 import { Button } from "./ui/button";
 import { useSearchHistoryStore, useSearchStore } from "@/store/searchStore";
+import {DatasetUpload} from "./DatasetUpload";
 
 export default function Header() {
   //getting the state of the search history sheet from the zustand store
@@ -36,7 +37,7 @@ export default function Header() {
     checkStatus();
 
     // Poll every 3 seconds
-    //const interval = setInterval(checkStatus, 3000);
+    const interval = setInterval(checkStatus, 3000);
 
     // Cleanup
     return () => clearInterval(interval);
@@ -111,6 +112,7 @@ export default function Header() {
           {hasData ? "Dataset Loaded" : "No Dataset Loaded"}
         </div>
         <div>
+          <DatasetUpload/>
           <Button
             variant="outline"
             className="mr-4 font-semibold border-2"

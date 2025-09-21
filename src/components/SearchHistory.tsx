@@ -41,6 +41,11 @@ export function SearchHistory() {
     }
   }, [historySheetOpen]); // refresh when sheet opens
 
+  function resetHistory(){
+    setHistory([]);
+    localStorage.removeItem("searchHistory");
+  }
+
   return (
     <Sheet open={historySheetOpen} onOpenChange={setHistorySheetOpen}>
       <SheetContent>
@@ -76,7 +81,7 @@ export function SearchHistory() {
           <SheetClose asChild>
             <Button className="font-semibold font-sans">Close</Button>
           </SheetClose>
-          <Button variant="destructive" className="font-semibold font-sans">Clear History</Button>
+          <Button variant="destructive" className="font-semibold font-sans" onClick={resetHistory}>Clear all History</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
