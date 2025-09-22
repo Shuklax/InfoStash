@@ -49,7 +49,11 @@ docker run -p 3000:3000 \
 
 ```
 ---
-<img width="673" height="820" alt="image" src="https://github.com/user-attachments/assets/b7c9f81e-c65c-4a8e-984c-d7a46f715a7f" />
+<img width="4662" height="5725" alt="image" src="https://github.com/user-attachments/assets/f1dd1c84-3836-480a-9789-6a44d3548230" />
+
+<img width="4430" height="7980" alt="image" src="https://github.com/user-attachments/assets/df7427b1-5aff-4e6e-abd7-cf66b9fdd3ba" />
+
+<img width="4428" height="7953" alt="image" src="https://github.com/user-attachments/assets/36d7eac0-699c-4110-8b03-1a0859b2c5c2" />
 
 ---
 # InfoStash Search API
