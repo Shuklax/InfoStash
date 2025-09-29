@@ -1,3 +1,5 @@
+<img width="1912" height="912" alt="image" src="https://github.com/user-attachments/assets/3956a629-5573-4240-b8bd-e48f1d11767b" />
+
 ## Setup
 
 Make sure you've installed Node.js (version 22+). Then run:
