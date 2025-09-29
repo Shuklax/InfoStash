@@ -20,7 +20,7 @@ export { FILENAME, DIRNAME };
 const DB_FILE = path.join(DIRNAME, "../data.db");
 //download link to the dataset zip file
 const DATASET_URL =
-  "https://fiber-challenges.s3.us-east-1.amazonaws.com/sample-data.zip";
+  "https://huggingface.co/datasets/Built-with/InfoStash/resolve/main/sample-data.zip";
 
 // interface of how our DBs will look like
 interface DB {
